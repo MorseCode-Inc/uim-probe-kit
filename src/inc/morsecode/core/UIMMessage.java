@@ -1,6 +1,5 @@
 package inc.morsecode.core;
 
-
 import inc.morsecode.NDS;
 
 /**
