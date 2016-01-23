@@ -121,7 +121,20 @@ public class UIMAlarmMessage extends UIMMessage {
 
 	public String getAlarmDomain() { return get("udata/"+ DOMAIN); }
 
-	public String getAlarmNimid() { return get("udata/"+ NIMID); }
+	public String getAlarmNimid() { 
+	
+		String id= get("udata/"+ NIMID);
+		
+		if (id != null) {
+			int k= -1;
+			if ((k= id.indexOf("-")) >= 0) {
+				id= id.substring(0, k);
+			}
+		}
+		
+		return id;
+	
+	}
 
 	public String getAlarmSuppCount() { return get("udata/"+ SUPPCOUNT); }
 

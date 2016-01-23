@@ -52,6 +52,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	
 	private String name= null;
 	private HashMap<String, NDS> sections= new HashMap<String, NDS>();
+	private HashMap<String, NDSValue> index= new HashMap<String, NDSValue>();
 	private ArrayList<NDS> sectionList= new ArrayList<NDS>();
 	private MergeRule rule= MergeRule.DEFAULT;
 	private long modified;
@@ -119,6 +120,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 		// if reference, then just point our internal variables to the same as the source nds
 		if (reference) {
+			this.index= nds.index;
 			this.sections= nds.sections;
 			this.sectionList= nds.sectionList;
 			this.rule= nds.rule;
@@ -383,28 +385,36 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	 */
 	public NDSValue delete(String path) {
 		if (path == null) { return null; }
+		
+		NDSValue toDelete= index.remove(path);
+		if (toDelete == null) { return null; }
+		
 		String[] sections= ArrayUtils.split(path, '/', true);
 		String tag= sections[0];
 		String key= sections[sections.length - 1];
 		
+		String remainder= ArrayUtils.join(sections, "/", 0);
+		if (sections.length > 1) {
+			remainder= ArrayUtils.join(sections, "/", 1);
+		}
+		
 		NDSValue deleted= null;
 		
-		// if (!tag.equals(getName())) {
-			// maybe it's in our direct child sections
-			if (this.sections.containsKey(tag)) {
-				try {
-					lock();
-					deleted= this.sections.remove(tag);
-					this.sectionList.remove(deleted);
-				} finally { 
-					release();
-				}
-					
-			}
-		// }
-		
-		if (deleted != null) { return deleted; }
+		if (this.sections.containsKey(tag)) {
 			
+			if (sections.length <= 2) {
+				deleted= this.sections.remove(tag);
+				if (deleted != null) {
+					this.sectionList.remove(deleted);
+				}
+			} else {
+				deleted= this.sections.get(tag).delete(remainder);
+			}
+			
+			return deleted;
+		}
+		
+		
 		if (sections.length == 2) {
 			try {
 				lock();
@@ -412,67 +422,38 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			} finally {
 				release();
 			}
-		} 
+		} else if (sections.length == 1 && this.attributes.containsKey(key)) {
+			return this.attributes.remove(key);
+		}
 		
 		if (deleted != null) { return deleted; }
 		
-		
-		try {
-			lock();
-			for (int i= 0; i < sectionList.size(); i++) {
-				NDS element= sectionList.get(i);
-				
-				if (element.getName().equals(sections[1])) {
-					String remainder= ArrayUtils.join(sections, "/", 1);
-					if (remainder.equals(element.getName())) {
-						deleted= this.sections.remove(remainder);
-						if (deleted != null) {
-							sectionList.remove(i--);
+		if (sections.length > 1) {
+			try {
+				lock();
+				for (int i= 0; i < sectionList.size(); i++) {
+					NDS element= sectionList.get(i);
+					
+					if (element.getName().equals(sections[1])) {
+						if (remainder.equals(element.getName())) {
+							deleted= this.sections.remove(remainder);
+							if (deleted != null) {
+								sectionList.remove(i--);
+							}
+							return deleted;
+						} else {
+							return element.delete(remainder);
 						}
-						return deleted;
-					} else {
-						return element.delete(remainder);
+						
 					}
 					
 				}
-				
+			} finally { 
+				release();
 			}
-		} finally { 
-			release();
 		}
 		
-		
-		try {
-			lock();
-			for (int i= 0; i < sectionList.size(); i++) {
-				NDS element= sectionList.get(i);
-				
-				if (element.getName().equals(sections[1])) {
-					String remainder= ArrayUtils.join(sections, "/", 1);
-					if (tag.equals(element.getName())) {
-						deleted= this.sections.remove(remainder);
-						if (deleted != null) {
-							sectionList.remove(i--);
-						}
-						return deleted;
-					} else {
-						return element.delete(remainder);
-					}
-					
-				}
-				
-			}
-		} finally { 
-			release();
-		}
-		
-	
-		
-		
-		
-		
-
-		return deleted;
+		return toDelete;
 	}
 
 
@@ -493,6 +474,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 				}
 				
 			} else {
+				index.put(section.getName(), section);
 				sections.put(section.getName(), section);
 				sectionList.add(section);
 			}
@@ -545,6 +527,8 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			delete(path);
 			return;
 		}
+		
+		index.put(path, value);
 		
 		String tag= sections[0];
 		String key= sections[sections.length - 1];
@@ -1076,17 +1060,15 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 				break;
 			case PDS_ARRAY:
 				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name());
-				break;
 			case STR_ARRAY:
 				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name());
-				break;
 			default:
 				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name());
-			}
-			try {
-				pds.put(key, value.toString());
-			} catch (NimException nx) {
-				System.err.println(nx.getMessage());
+				try {
+					pds.put(key, value.toString());
+				} catch (NimException nx) {
+					System.err.println(nx.getMessage());
+				}
 			}
 		}
 		
@@ -1316,34 +1298,4 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	}
 
 	
-	
-//
-//	public static void main(String[] args) throws FileNotFoundException, IOException {
-//		
-//		NDS n= new NDS();
-//		
-//		n.set("first", "Brad");
-//		n.set("last", "Morse");
-//		n.set("test/setting", true);
-//		n.set("test/my/setting", "it worked");
-//		
-//		// System.out.println(n);
-//		
-//		NDS m= new NDS(n.seek("test"), false);
-//		NDS o= new NDS(n, false);
-//		
-//		// m.set("test/setting", false);
-//		o.set("test/setting", false);
-//		m.set("my/setting", "wow");
-//		m.set("my/here", "is great");
-//		
-//		System.out.println("M:\n"+ m);
-//		
-//		System.out.println("O:\n"+ o);
-//		System.out.println("N:\n"+ n);
-//		
-//		
-//		n.writeToFile(new File("/tmp/test.nds"));
-//	}
-//	
 }

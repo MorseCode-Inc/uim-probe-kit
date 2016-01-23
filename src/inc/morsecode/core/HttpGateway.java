@@ -69,13 +69,18 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	private boolean admin= false;
 	private boolean startup= true;
 	
+	private boolean enforceLicense= true;
 	
-	public HttpGateway(String PROBE_NAME, String PROBE_VERSION, String[] args) throws NimException {
+	
+	protected HttpGateway(String PROBE_NAME, String PROBE_VERSION, String[] args) throws NimException {
 		this(PROBE_NAME, PROBE_VERSION, PROBE_MANUFACTURER, args);
 		Decode.Secret.alphabet= "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
 		// SimpleCalendar cal= new SimpleCalendar();
 		// cal.advanceDay(7);
 		// System.out.println((System.currentTimeMillis() % 10) + Encode.encode(cal.toString()));
+		if (getProbeName().equals("pagerdutygtw")) {
+			enforceLicense= false;
+		}
 	}
 
 	private HttpGateway(String name, String version, String manufacturer, String[] args) throws NimException {
@@ -143,6 +148,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		// unregisterCallback("bootstrap");
 		long interval= HttpGateway.getInterval();
 		
+		if (enforceLicense) {
 		try {
 			licenseCheck();
 		} catch (NimException nx) {
@@ -151,6 +157,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		} catch (IOException iox) {
 			log.error("License Check Failed: "+ iox.getMessage());
 			System.exit(1);
+		}
 		}
 		
 		try {
@@ -353,7 +360,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		   			  String servletClass = webapp.get("servlet", ""); // "inc.morsecode.probes.http_gateway.Gateway");
 		   			  
 		   			  if (!servletClass.startsWith("inc.morsecode.") && !servletClass.contains(".")) {
-		   				  servletClass= "inc.morsecode.pagerduty.endpoints." + servletClass;
+		   				  servletClass= "inc.morsecode.endpoints." + servletClass;
 		   			  }
 		   			  
 		   			  web.setServletClass(servletClass);
@@ -510,6 +517,10 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 
 	public NimRequest controllerRequest() {
 		return new NimRequest("controller", "get_info");
+	}
+	
+	public NimRequest spoolerRequest(String method, PDS args) {
+		return new NimRequest("spooler", method, args);
 	}
 
 	protected NDS writeConfig(String section, String key, String value, NimRequest controller) throws NimException {
@@ -692,7 +703,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		
 		String key= config.get("setup/license/key", "");
 		
-		ProbeLicense license= HttpGateway.readLicense(key);
+		ProbeLicense license= HttpGateway.readLicense(getProbeName() +"_license", key);
 		
 		if (license == null) {
 			System.err.println("Unable to verify license (null).");
@@ -750,7 +761,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	}
 	
 	
-	static ProbeLicense readLicense(String key) {
+	static ProbeLicense readLicense(String name, String key) {
 		
 		try {
 			String info= Decode.decode(key);
@@ -771,7 +782,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 			
 			ProbeLicense license;
 			try {
-				license = new ProbeLicense(issuedTo, instances, DateKit.toCalendar(pieces[2]));
+				license = new ProbeLicense(name, issuedTo, instances, DateKit.toCalendar(pieces[2]));
 				return license;
 			} catch (ParseException e) {
 				System.err.println("ERR Reading License Date: "+ e.getMessage());

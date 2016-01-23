@@ -53,14 +53,44 @@ public class AlarmCriterionRule extends NDS {
 				if (value == null) {
 					System.err.println("Invalid alarm criteria key: '"+ key +"' is null. Filter may not work as desired.");
 					System.err.println("ALARM DATA:");
-					System.err.println(new NDS(alarm));
+					System.err.println(new NDS(alarm).toString());
 				}
 				
 				if ("matches".equals(comparison)) {
 					if (value != null) {
-						boolean matches = compare(pattern, value);
+						boolean matches = compare(key, pattern, value);
 						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ~= "+ pattern +" ] ? "+ matches);
+						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ~ "+ pattern +" ] "+ getRule() +" ? "+ matches);
+					
+						if (!matches) {
+							return false;
+						}
+					}
+				} else if ("starts_with".equals(comparison)) {
+					if (value != null) {
+						boolean matches = value.startsWith(pattern);
+						
+						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" starts_with "+ pattern +" ] "+ getRule() +" ? "+ matches);
+					
+						if (!matches) {
+							return false;
+						}
+					}
+				} else if ("ends_with".equals(comparison)) {
+					if (value != null) {
+						boolean matches = value.endsWith(pattern);
+						
+						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ends_with "+ pattern +" ] "+ getRule() +" ? "+ matches);
+					
+						if (!matches) {
+							return false;
+						}
+					}
+				} else if ("contains".equals(comparison)) {
+					if (value != null) {
+						boolean matches = value.contains(pattern);
+						
+						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" contains "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
 						if (!matches) {
 							return false;
@@ -72,7 +102,7 @@ public class AlarmCriterionRule extends NDS {
 					if (value != null) {
 						boolean matches = value.equalsIgnoreCase(pattern);
 						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" eq "+ pattern +" ] ? "+ matches);
+						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" eq "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
 						if (!matches) {
 							return false;
@@ -81,12 +111,12 @@ public class AlarmCriterionRule extends NDS {
 					
 				} else if ("not".equals(comparison)) {
 					if (value != null) {
-						boolean matches = compare(pattern, value);
+						boolean matches = compare(key, pattern, value);
 						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" !~= "+ pattern +" ] ? "+ !matches);
+						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" !~ "+ pattern +" ] "+ getRule() +" ? "+ !matches);
 					
 						if (matches) {
-							return !matches;
+							return false;
 						}
 						
 					}
@@ -100,7 +130,7 @@ public class AlarmCriterionRule extends NDS {
 				String expected= get(key);
 				
 				if (value != null) {
-					System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" == "+ expected +" ] ? "+ value.equals(expected));
+					System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" == "+ expected +" ] "+ getRule() +" ? "+ value.equals(expected));
 					if (!value.equals(expected)) {
 						return false;
 					}
@@ -117,13 +147,13 @@ public class AlarmCriterionRule extends NDS {
 
 
 
-	public boolean compare(String pattern, String value) {
+	public boolean compare(String key, String pattern, String value) {
 		// make sure the pattern is valid
 		boolean matches= false;
 		try {
 			matches= value.matches(pattern);
 		} catch (PatternSyntaxException psx) {
-			System.err.println("Invalid Java Pattern: '"+ pattern +"': "+ psx.getMessage());
+			System.err.println("Invalid Regular Expression Pattern ["+ key +" '"+ pattern +"']: "+ psx.getMessage());
 			psx.printStackTrace();
 			matches= (value.equals(pattern));
 		}

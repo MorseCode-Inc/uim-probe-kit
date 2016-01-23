@@ -65,7 +65,20 @@ public class UIMMessage extends NDS {
 	public NDS getBody() { return seek("udata"); }
 	
 	
-	public String getNimid() { return get(NIMID); }
+	public String getNimid() { 
+		
+		String id= get(NIMID); 
+		
+		if (id != null) {
+			int k= -1;
+			if ((k= id.indexOf("-")) >= 0) {
+				id= id.substring(0, k);
+			}
+		}
+		
+		return id;
+	}
+	
 	public String getNimts() { return get(NIMTS); }
 	public String getTzOffset() { return get(TZ_OFFSET); }
 	public String getOrigin() { return get(ORIGIN); }

@@ -15,4 +15,6 @@ public class ListResult<T> extends ArrayList<T> {
 	public int getCount() {
 		return count;
 	}
+	
+	
 }

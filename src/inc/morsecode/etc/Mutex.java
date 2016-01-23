@@ -25,7 +25,7 @@ public class Mutex {
 	
 	public boolean lock(int timeout) {
 		
-		int interval= 30;				// frequency to check the lock
+		int interval= 3;				// frequency to check the lock
 		int maxWait= timeout * 1000;	// maximum time to try and get the lock before giving up
 		int cycles= 0;
 		

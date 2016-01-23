@@ -12,13 +12,12 @@ public class ProbeLicense extends NDS {
 	private SimpleCalendar validThru;
 	private int instances;
 
-	public ProbeLicense(String issuedTo, int instances, SimpleCalendar validThru) {
-		setName("pagerduty_license");
+	public ProbeLicense(String name, String issuedTo, int instances, SimpleCalendar validThru) {
+		setName(name);
 		set("Issued To", issuedTo);
 		set("Instances", instances);
 		set("Valid Until", validThru.toString());
 	}
-	
 	
 	final public void setKey(String key) { set("key", key); }
 	final public String getKey() { return get("key", null); }

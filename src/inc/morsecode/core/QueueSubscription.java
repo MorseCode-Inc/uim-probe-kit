@@ -114,6 +114,10 @@ public class QueueSubscription extends NDS implements Runnable {
 	}
 	
 	public void receive(NimSession session, PDS envelope, PDS args) throws NimException {
+		if (!ready) { 
+			session.sendReply(1, new PDS());
+			return;
+		}
 		System.out.println("["+ envelope.get("subject") +":"+ envelope.get("nimid") +"] from "+ envelope.get("robot") +"("+ envelope.get("prid") +")");
 		try {
 			while (!lock()) { try { Thread.sleep(2); } catch (InterruptedException ignored) { }  }
