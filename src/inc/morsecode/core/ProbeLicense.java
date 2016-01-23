@@ -8,9 +8,6 @@ import util.kits.SimpleCalendar;
 
 public class ProbeLicense extends NDS {
 	
-	private String issuedTo;
-	private SimpleCalendar validThru;
-	private int instances;
 
 	public ProbeLicense(String name, String issuedTo, int instances, SimpleCalendar validThru) {
 		setName(name);
