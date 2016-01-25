@@ -51,14 +51,16 @@ public class AlarmCriterionRule extends NDS {
 				String value= alarm.get("udata/"+ key);
 				
 				if (value == null) {
-					System.err.println("Invalid alarm criteria key: '"+ key +"' is null. Filter may not work as desired.");
-					System.err.println("ALARM DATA:");
-					System.err.println(new NDS(alarm).toString());
+					System.err.println("Invalid alarm criteria key: '"+ key +"' is null for rule '"+ getName() +"'. Filter may not work as desired.");
+					// System.err.println("ALARM DATA:");
+					// System.err.println(new NDS(alarm).toString());
 				}
 				
+				
+				
+				boolean matches= false;
 				if ("matches".equals(comparison)) {
 					if (value != null) {
-						boolean matches = compare(key, pattern, value);
 						
 						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ~ "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
@@ -68,7 +70,7 @@ public class AlarmCriterionRule extends NDS {
 					}
 				} else if ("starts_with".equals(comparison)) {
 					if (value != null) {
-						boolean matches = value.startsWith(pattern);
+						matches = value.startsWith(pattern);
 						
 						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" starts_with "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
@@ -78,7 +80,7 @@ public class AlarmCriterionRule extends NDS {
 					}
 				} else if ("ends_with".equals(comparison)) {
 					if (value != null) {
-						boolean matches = value.endsWith(pattern);
+						matches = value.endsWith(pattern);
 						
 						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ends_with "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
@@ -88,9 +90,8 @@ public class AlarmCriterionRule extends NDS {
 					}
 				} else if ("contains".equals(comparison)) {
 					if (value != null) {
-						boolean matches = value.contains(pattern);
+						matches = value.contains(pattern);
 						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" contains "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
 						if (!matches) {
 							return false;
@@ -100,7 +101,7 @@ public class AlarmCriterionRule extends NDS {
 					
 				} else if ("eq".equals(comparison)) {
 					if (value != null) {
-						boolean matches = value.equalsIgnoreCase(pattern);
+						matches = value.equalsIgnoreCase(pattern);
 						
 						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" eq "+ pattern +" ] "+ getRule() +" ? "+ matches);
 					
@@ -111,7 +112,7 @@ public class AlarmCriterionRule extends NDS {
 					
 				} else if ("not".equals(comparison)) {
 					if (value != null) {
-						boolean matches = compare(key, pattern, value);
+						matches = compare(key, pattern, value);
 						
 						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" !~ "+ pattern +" ] "+ getRule() +" ? "+ !matches);
 					
@@ -122,6 +123,8 @@ public class AlarmCriterionRule extends NDS {
 					}
 					
 				}
+				
+				System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" "+ comparison +" "+ pattern +" ] "+ getRule() +" ? "+ matches);
 				
 			} else if (!key.startsWith("_")) {
 				// exact equality matching

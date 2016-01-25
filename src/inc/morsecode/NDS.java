@@ -387,7 +387,15 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		if (path == null) { return null; }
 		
 		NDSValue toDelete= index.remove(path);
-		if (toDelete == null) { return null; }
+		/*
+		Object udata= index.get("udata");
+		if (toDelete == null && getName() != null) { 
+			toDelete= index.remove(getName() +"/"+ path);
+			if (toDelete == null) {
+				return null; 
+			}
+		}
+		*/
 		
 		String[] sections= ArrayUtils.split(path, '/', true);
 		String tag= sections[0];
@@ -453,7 +461,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			}
 		}
 		
-		return toDelete;
+		return null;
 	}
 
 
@@ -474,7 +482,9 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 				}
 				
 			} else {
+				
 				index.put(section.getName(), section);
+				
 				sections.put(section.getName(), section);
 				sectionList.add(section);
 			}
@@ -538,6 +548,9 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			if (sections.length == 1) {
 				if (value.getValue() instanceof NDS) {
 					// System.err.println("Adding NDS "+ ((NDS)value).getName() + " under "+ this.getName());
+					if (!key.equals(((NDS)value).getName())) {
+						((NDS)value).setName(key);
+					}
 					add((NDS)value);
 				} else {
 					this.attributes.put(key, value);
@@ -698,7 +711,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 				}
 			}
 			
-			if (sections.length > 1) {
+			if (sections.length > 1 && section != null) {
 				return section.seek(ArrayUtils.join(sections, "/", 1, sections.length), autocreate);
 			}
 		

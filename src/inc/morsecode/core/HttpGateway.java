@@ -72,33 +72,33 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	private boolean enforceLicense= true;
 	
 	
-	protected HttpGateway(String PROBE_NAME, String PROBE_VERSION, String[] args) throws NimException {
-		this(PROBE_NAME, PROBE_VERSION, PROBE_MANUFACTURER, args);
+	protected HttpGateway(String name, String version, String[] args) throws NimException {
+		this(name, version, PROBE_MANUFACTURER, args);
 		Decode.Secret.alphabet= "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
 		// SimpleCalendar cal= new SimpleCalendar();
 		// cal.advanceDay(7);
 		// System.out.println((System.currentTimeMillis() % 10) + Encode.encode(cal.toString()));
-		if (getProbeName().equals("pagerdutygtw")) {
-			enforceLicense= false;
-		}
+		// if (getProbeName().equals("pagerdutygtw")) {
+			// enforceLicense= false;
+		// }
 	}
 
 	private HttpGateway(String name, String version, String manufacturer, String[] args) throws NimException {
 		super(name, version, manufacturer, args);
 		HttpGateway.instance= this;
+		
 		this.log= NimLog.getLogger(this.getClass());
 		refreshConfiguration();
 		NimLog.setLogLevel(getLogLevel());
 		log.setLogSize(getLogSize());
-		log.info("Log Level = "+ getLogLevel());
-		setStartPort(48005);
 		
 		NimLogPrintWriter error= new NimLogPrintWriter(log, NimLog.ERROR);
 		NimLogPrintWriter out= new NimLogPrintWriter(log, NimLog.INFO);
-		
 		System.setErr(error);
 		System.setOut(out);
 		
+		log.info("Log Level = "+ getLogLevel());
+		setStartPort(getProbePort());
 		ready= true;
 	}
 	
@@ -522,6 +522,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	public NimRequest spoolerRequest(String method, PDS args) {
 		return new NimRequest("spooler", method, args);
 	}
+	
 
 	protected NDS writeConfig(String section, String key, String value, NimRequest controller) throws NimException {
 		NDS nds= new NDS();
@@ -573,6 +574,11 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	 */
 	static public int getSampleRate() {
 		return (int)(getInterval() / 1000);
+	}
+	
+	static public int getProbePort() {
+		int level= config.get("setup/port", 48005);
+		return level;
 	}
 	
 	static public int getLogLevel() {

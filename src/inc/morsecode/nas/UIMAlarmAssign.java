@@ -9,5 +9,6 @@ public class UIMAlarmAssign extends UIMAlarmMessage {
 	public UIMAlarmAssign(UIMMessage message) { super(message); }
 
 
+
 	
 }

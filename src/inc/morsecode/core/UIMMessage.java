@@ -69,12 +69,14 @@ public class UIMMessage extends NDS {
 		
 		String id= get(NIMID); 
 		
+		/*
 		if (id != null) {
 			int k= -1;
 			if ((k= id.indexOf("-")) >= 0) {
 				id= id.substring(0, k);
 			}
 		}
+		*/
 		
 		return id;
 	}

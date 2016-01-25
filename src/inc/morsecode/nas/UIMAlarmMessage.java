@@ -48,6 +48,22 @@ public class UIMAlarmMessage extends UIMMessage {
 	public UIMAlarmMessage(NDS nds) {
 		super(nds);
 	}
+	
+	public String signature() {
+		String sig= "";
+		sig+= getAlarmNimid();
+		sig+= " ["+ getAlarmSeverity() +"]";
+		sig+= " robot="+ getAlarmRobot();
+		if (isAssigned()) {
+			sig+= " assignedto="+ getAlarmAssignedTo();
+		}
+		sig+= ": "+ getAlarmMessage();
+		return sig;
+	}
+	
+	public boolean isAssigned() {
+		return getAlarmAssignedTo() != null;
+	}
 
 	public String getAlarmSid() { return get("udata/"+ SID); }
 	
@@ -125,12 +141,14 @@ public class UIMAlarmMessage extends UIMMessage {
 	
 		String id= get("udata/"+ NIMID);
 		
+		/*
 		if (id != null) {
 			int k= -1;
 			if ((k= id.indexOf("-")) >= 0) {
 				id= id.substring(0, k);
 			}
 		}
+		*/
 		
 		return id;
 	
