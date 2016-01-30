@@ -52,79 +52,40 @@ public class AlarmCriterionRule extends NDS {
 				
 				if (value == null) {
 					System.err.println("Invalid alarm criteria key: '"+ key +"' is null for rule '"+ getName() +"'. Filter may not work as desired.");
-					// System.err.println("ALARM DATA:");
-					// System.err.println(new NDS(alarm).toString());
 				}
-				
-				
 				
 				boolean matches= false;
 				if ("matches".equals(comparison)) {
 					if (value != null) {
-						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ~ "+ pattern +" ] "+ getRule() +" ? "+ matches);
-					
-						if (!matches) {
-							return false;
-						}
+						matches = compare(key, pattern, value);
 					}
 				} else if ("starts_with".equals(comparison)) {
 					if (value != null) {
 						matches = value.startsWith(pattern);
-						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" starts_with "+ pattern +" ] "+ getRule() +" ? "+ matches);
-					
-						if (!matches) {
-							return false;
-						}
 					}
 				} else if ("ends_with".equals(comparison)) {
 					if (value != null) {
 						matches = value.endsWith(pattern);
-						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" ends_with "+ pattern +" ] "+ getRule() +" ? "+ matches);
-					
-						if (!matches) {
-							return false;
-						}
 					}
 				} else if ("contains".equals(comparison)) {
 					if (value != null) {
 						matches = value.contains(pattern);
-						
-					
-						if (!matches) {
-							return false;
-						}
 					}
-				
-					
 				} else if ("eq".equals(comparison)) {
 					if (value != null) {
 						matches = value.equalsIgnoreCase(pattern);
-						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" eq "+ pattern +" ] "+ getRule() +" ? "+ matches);
-					
-						if (!matches) {
-							return false;
-						}
 					}
 					
 				} else if ("not".equals(comparison)) {
 					if (value != null) {
-						matches = compare(key, pattern, value);
-						
-						System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" !~ "+ pattern +" ] "+ getRule() +" ? "+ !matches);
-					
-						if (matches) {
-							return false;
-						}
-						
+						matches = !compare(key, pattern, value);
 					}
-					
 				}
 				
 				System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" "+ comparison +" "+ pattern +" ] "+ getRule() +" ? "+ matches);
+				if (!matches) {
+					return false;
+				}
 				
 			} else if (!key.startsWith("_")) {
 				// exact equality matching

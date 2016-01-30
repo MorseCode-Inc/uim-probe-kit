@@ -17,4 +17,7 @@ public class UIMAlarmClose extends UIMMessage {
 		return str;
 	}
 	
+
+	
+	
 }

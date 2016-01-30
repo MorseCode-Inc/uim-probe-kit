@@ -207,6 +207,21 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 		return nds;
 	}
+	
+	public String[] getArray(String string, String[] ifNull) {
+		
+		ArrayList<String> array= new ArrayList<String>();
+		
+		NDS nds= seek(string, false);
+		
+		if (nds == null) { return ifNull; }
+		
+		for (String key : nds.keys()) {
+			array.add(nds.get(key));
+		}
+		
+		return array.toArray(new String[0]);
+	}
 
 
 	public static NDS create(String name, PDS pds) throws NimException {
@@ -250,10 +265,19 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 				
 				break;
 			case PDS.PDS_PPCH:
-			
+				
+				String[] table= pds.getTableStrings(key);
+				nds.set(key, table);
 				break;
 			case PDS.PDS_VOID:
+				byte[] data= pds.getBytes(key);
+				nds.set(key, data);
+				// System.err.println("Unsupported PDS Datatype: "+ pds.getTypeAsName(key));
 				break;
+			default: 
+				System.err.println("Unsupported PDS Datatype: "+ pds.getTypeAsName(key));
+				Object o= pds.get(key);
+				System.err.println(o);
 			}
 			
 		}
@@ -284,8 +308,18 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 		return nds;
 	}
+	
+	 public void set(String key, String[] table) {
+		 
+		 if (table == null) { return; }
+		 
+		 for (int i= 0; i < table.length; i++) {
+			 set(key +"/"+ i, table[i]);
+		 }
+		
+	}
 
-	 /* (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, inc.morsecode.NDS)
 	 */
 	public void set(String path, NDS section) {
@@ -362,6 +396,14 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		set(key, new NDSValue(value));
 	}
 
+
+	 public void set(String key, byte[] data) {
+		if (key == null) { return; }
+		if (data == null) { delete(key); return; }
+		set(key, new NDSValue(data));
+		 
+	 }
+	 
 	/* (non-Javadoc)
 	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, java.lang.Long)
 	 */
@@ -845,7 +887,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	 * @see inc.morsecode.PortableDataStructureInterface#get(java.lang.String, int)
 	 */
 	public int get(String key, int ifNull) {
-		NDSValue value= attributes.get(key);
+		NDSValue value= getValue(key);
 		
 		if (value == null) { return ifNull; }
 		if (value.getValue() == null) { return ifNull; }
@@ -1071,12 +1113,13 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			case LONG:
 				pds.put(key, (long)value.getValue());
 				break;
-			case PDS_ARRAY:
-				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name());
 			case STR_ARRAY:
-				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name());
+				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name() +")");
+				break;
+			case PDS_ARRAY:
+				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name() +")");
 			default:
-				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name());
+				System.err.println("Unsupported PDS datatype: "+ value.getType() +" ("+ value.getType().name() +")");
 				try {
 					pds.put(key, value.toString());
 				} catch (NimException nx) {

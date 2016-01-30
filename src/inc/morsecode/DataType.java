@@ -12,6 +12,7 @@ public enum DataType {
 	, NDS(PDS.PDS_PDS, NDS.class)
 	, STR_ARRAY(PDS.PDS_PPCH, String[].class)		// array of strings
 	, PDS_ARRAY(PDS.PDS_PPDS, PDS[].class)			// array of pds'
+	, PDS_BINARY(PDS.PDS_VOID, Object.class)			// array of pds'
 	;
 	
 	private int constant;

@@ -62,6 +62,11 @@ public class NDSValue {
 		}
 	}
 	
+	public NDSValue(byte[] value) {
+		this.value= value;
+		this.type= DataType.PDS_BINARY;
+	}
+	
 	public NDSValue(Object value) {
 		this.value= value;
 		
@@ -92,6 +97,10 @@ public class NDSValue {
 	
 	public String toString() {
 		if (value == null) { return "null"; }
+		if (this.type == DataType.PDS_BINARY) {
+			return "binary[]";
+			// return new String((byte[])value);
+		}
 		return value.toString();
 	}
 	
