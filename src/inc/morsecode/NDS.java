@@ -1338,6 +1338,11 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		}
 		return mass;
 	}
+	
+	public boolean isEmpty() {
+		return length() + mass() == 0;
+	}
+
 
 	/* (non-Javadoc)
 	 * @see inc.morsecode.PortableDataStructureInterface#pop()
@@ -1352,6 +1357,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 		return (NDS) delete(section.getName());
 	}
+
 
 	
 }
