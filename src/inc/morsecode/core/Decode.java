@@ -2,8 +2,6 @@ package inc.morsecode.core;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 import util.security.Crypto;
 import util.security.codecs.SecurityCodec;
 
