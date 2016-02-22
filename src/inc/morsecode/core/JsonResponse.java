@@ -1,12 +1,7 @@
 package inc.morsecode.core;
 
-import java.util.Map;
-
-import util.json.JsonObject;
-
-import com.nimsoft.nimbus.PDS;
-
-import inc.morsecode.NDS;;
+import inc.morsecode.NDS;
+import inc.morsecode.util.json.JsonObject;
 
 public class JsonResponse {
 	
