@@ -2,6 +2,7 @@ package inc.morsecode.core;
 
 import inc.morsecode.NDS;
 import inc.morsecode.probes.httpgtw.CGI;
+import inc.morsecode.util.json.JsonObject;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +14,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import util.json.JsonObject;
 import util.json.ex.MalformedJsonException;
 import util.kits.JsonParser;
 
@@ -21,34 +21,15 @@ import com.nimsoft.nimbus.NimLog;
 
 public abstract class Endpoint extends HttpServlet {
 	
+	private static final long serialVersionUID = -2776581050963709584L;
+	
 	protected HttpGateway probe;
 	protected NDS nimenv;
 	protected NimLog log;
 
 	public Endpoint() {
 		super();
-		
-		/*
-		if (probe == null) {
-			try {
-				probe= new Probe(new String[]{});
-				nimenv= probe.updateControllerInfo();
-				
-				// NimUserLogin.login("administrator", "this4now");
-			} catch (NimException nx) {
-				System.err.println(nx.getMessage());
-				nx.printStackTrace();
-			}
-		}
-		// getServletContext().addServlet("/index.html", this);
-		 * */
 	}
-	
-	/*
-	public void setProbe(Probe probe, NDS config) {
-		this.setProbe((HttpGateway)probe, config);
-	}
-	*/
 	
 	public void setProbe(HttpGateway probe, NDS config) {
 		this.probe = probe;
@@ -68,16 +49,13 @@ public abstract class Endpoint extends HttpServlet {
 		
 		try {
 		
-			
 			CGI cgi= new CGI(req, resp);
-			
 			
 			if (!probe.isAuthorizedClient(req)) {
 				logMessage+= " Client IP Address Denied: "+ req.getRemoteAddr();
 				cgi.resp.sendError(401, "Unauthorized");
 				return;
 			}
-			
 			
 			String httpMethod= req.getMethod().toUpperCase();
 				
@@ -114,7 +92,6 @@ public abstract class Endpoint extends HttpServlet {
 							resp.setStatus(400);		// 400 = Bad Request
 							JsonResponse error= new JsonResponse(400, e.getMessage());
 							cgi.out.write(error.toString().getBytes());
-							// e.printStackTrace();
 						}
 					} else {
 							
@@ -124,34 +101,13 @@ public abstract class Endpoint extends HttpServlet {
 				
 				
 			} catch (InvocationTargetException itx) {
-				Throwable x= itx.getCause();
-				int line= x.getStackTrace()[0].getLineNumber();
-				String file= x.getStackTrace()[0].getFileName();
-				String message= (x.getClass().getSimpleName() +" @ "+ file +":"+ line +" ["+ x.getMessage() +"]");
-				System.err.println(sig + message);
-				x.printStackTrace();
-				resp.setStatus(500);
-				JsonResponse response= new JsonResponse(500, x.getClass().getSimpleName() +": "+ x.getMessage());
+				JsonResponse response= packError(resp, sig, itx, 500, itx.getMessage());
 				cgi.println(response);
 			} catch (NoSuchMethodException x) {
-				// simple(req, resp, cgi);
-				// Throwable x= itx.getCause();
-				int line= x.getStackTrace()[0].getLineNumber();
-				String file= x.getStackTrace()[0].getFileName();
-				String message= (x.getClass().getSimpleName() +" @ "+ file +":"+ line +" ["+ x.getMessage() +"]");
-				System.err.println(sig + message);
-				resp.setStatus(404);
-				JsonResponse response= new JsonResponse(404, x.getClass().getSimpleName() +": "+ function +" does not exist, check the name and try again.");
+				JsonResponse response= packError(resp, sig, x, 404, x.getClass().getSimpleName() +": "+ function +" does not exist, check the name and try again.");
 				cgi.println(response);
 			} catch (NoSuchMethodError x) {
-				// simple(req, resp, cgi);
-				int line= x.getStackTrace()[0].getLineNumber();
-				String file= x.getStackTrace()[0].getFileName();
-				String message= (x.getClass().getSimpleName() +" @ "+ file +":"+ line +" ["+ x.getMessage() +"]");
-				System.err.println(sig + message);
-				// x.printStackTrace();
-				resp.setStatus(404);
-				JsonResponse response= new JsonResponse(404, x.getClass().getSimpleName() +": "+ function +" does not exist, check the name and try again.");
+				JsonResponse response= packError(resp, sig, x, 404, x.getClass().getSimpleName() +": "+ function +" does not exist, check the name and try again.");
 				cgi.println(response);
 			} finally {
 			}
@@ -189,20 +145,15 @@ public abstract class Endpoint extends HttpServlet {
 		
 	}
 
-	/*
-	private void simple(HttpServletRequest req, HttpServletResponse resp, CGI cgi) throws ServletException, IOException {
-		if ("GET".equalsIgnoreCase(req.getMethod())) {
-			index(cgi);
-		} else if ("POST".equalsIgnoreCase(req.getMethod())) {
-			// POST(vars, req, resp);
-			
-		//} else if ("PUT".equalsIgnoreCase(req.getMethod())) {
-		//} else if ("DELETE".equalsIgnoreCase(req.getMethod())) {
-		} else {
-			super.service(req, resp);
-		}
+	private JsonResponse packError(HttpServletResponse resp, String sig, Throwable x, int code, String msg) {
+		int line= x.getStackTrace()[0].getLineNumber();
+		String file= x.getStackTrace()[0].getFileName();
+		String message= (x.getClass().getSimpleName() +" @ "+ file +":"+ line +" ["+ msg +"]");
+		System.err.println(sig + message);
+		resp.setStatus(code);
+		return new JsonResponse(code, x.getClass().getSimpleName() +": "+ msg);
 	}
-	*/
+
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
@@ -238,13 +189,6 @@ public abstract class Endpoint extends HttpServlet {
 		}
 	}
 
-	
-	/*
-	protected abstract void POST(NDS vars, HttpServletRequest req, HttpServletResponse resp) throws Exception;
-	protected abstract void PUT(NDS vars, HttpServletRequest req, HttpServletResponse resp) throws Exception;
-	protected abstract void DELETE(NDS vars, HttpServletRequest req, HttpServletResponse resp) throws Exception;
-	*/
-	
 	
 	
 	public void index(CGI cgi) throws ServletException, IOException {
