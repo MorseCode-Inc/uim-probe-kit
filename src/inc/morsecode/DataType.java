@@ -3,6 +3,18 @@ package inc.morsecode;
 import com.nimsoft.nimbus.PDS;
 
 
+/**
+ * 
+ * &copy; MorseCode Incorporated 2015<br/>
+ * =--------------------------------=<br/><pre>
+ * Created: Aug 21, 2015
+ * Project: uim-probe-kit
+ *
+ * Description:
+ * NDS Data Type
+ * </pre></br>
+ * =--------------------------------=
+ */
 public enum DataType {
 	STR(PDS.PDS_PCH, String.class)
 	, FLOAT(PDS.PDS_F, Double.class)
