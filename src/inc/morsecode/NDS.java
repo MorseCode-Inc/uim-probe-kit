@@ -2,6 +2,9 @@ package inc.morsecode;
 
 import inc.morsecode.etc.ArrayUtils;
 import inc.morsecode.etc.Mutex;
+import inc.morsecode.util.json.JsonArray;
+import inc.morsecode.util.json.JsonObject;
+import inc.morsecode.util.json.JsonValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,10 +17,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import util.json.JsonArray;
-import util.json.JsonObject;
-import util.json.JsonValue;
 
 import com.nimsoft.nimbus.NimConfig;
 import com.nimsoft.nimbus.NimException;
@@ -57,6 +56,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	private MergeRule rule= MergeRule.DEFAULT;
 	private long modified;
 	private long last_access;
+	private boolean treatEmptyAsNull= true;
 	
 	private HashMap<String, NDSValue> attributes= new HashMap<String, NDSValue>();
 	
@@ -154,6 +154,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			}
 		}
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see inc.morsecode.PortableDataStructureInterface#copy(java.lang.String, util.json.JsonArray)
@@ -318,35 +319,10 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		 }
 		
 	}
+	 
+	public void setTreatEmptyAsNull(boolean value) { this.treatEmptyAsNull = value; }
+	public void set(String path, NDS section) { this.set(path, (NDSValue)section); }
 
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, inc.morsecode.NDS)
-	 */
-	public void set(String path, NDS section) {
-		 this.set(path, (NDSValue)section);
-	 }
-
-	 /*
-	 public void add(String path, NDS section) {
-		if (path == null || "".equals(path.trim())) {
-			throw new RuntimeException("Invalid path, cannot be null or empty when trimmed ("+ path +")");
-		}
-		path= path.trim();
-		
-		if (path.contains("/")) {
-			
-			String[] pieces= ArrayUtils.split(path, '/', true);
-		} else {
-			section.setName(path);
-			add(section);
-		}
-	}
-	*/
-	
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#getSection(java.lang.String, inc.morsecode.NDS)
-	 */
 	public NDS getSection(String path, NDS ifNull) {
 		
 		String[] pathElements= ArrayUtils.split(path, '/', true);
@@ -429,15 +405,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		if (path == null) { return null; }
 		
 		NDSValue toDelete= index.remove(path);
-		/*
-		Object udata= index.get("udata");
-		if (toDelete == null && getName() != null) { 
-			toDelete= index.remove(getName() +"/"+ path);
-			if (toDelete == null) {
-				return null; 
-			}
-		}
-		*/
 		
 		String[] sections= ArrayUtils.split(path, '/', true);
 		String tag= sections[0];
@@ -519,6 +486,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 				for (String key : section.attributes.keySet()) {
 					nds.set(key, section.get(key));
 				}
+				
 				for (NDS child : section.sectionList) {
 					nds.add(child);
 				}
@@ -526,7 +494,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			} else {
 				
 				index.put(section.getName(), section);
-				
 				sections.put(section.getName(), section);
 				sectionList.add(section);
 			}
@@ -538,34 +505,8 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, long)
-	 */
-	public void set(String path, long value) { set(path, new NDSValue(value)); }
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, int)
-	 */
-	public void set(String path, int value) { set(path, new NDSValue(value)); }
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, double)
-	 */
-	public void set(String path, double value) { set(path, new NDSValue(value)); }
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, float)
-	 */
-	public void set(String path, float value) { set(path, new NDSValue(value)); }
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, boolean)
-	 */
-	public void set(String path, boolean value) { set(path, new NDSValue(value)); }
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, java.lang.String)
-	 */
-	public void set(String path, String value) { set(path, new NDSValue(value)); }
+
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, inc.morsecode.NDSValue)
-	 */
 	public void set(String path, NDSValue value) {
 		
 		String[] sections= ArrayUtils.split(path, '/', true);
@@ -695,15 +636,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 		return section.get(key, ifNull);
 	}
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#seek(java.lang.String)
-	 */
-	public NDS seek(String path) { return seek(path, false); }
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#seek(java.lang.String, boolean)
-	 */
+
 	public NDS seek(String path, boolean autocreate) {
 		
 		String[] sections= ArrayUtils.split(path, '/', true);
@@ -844,24 +777,22 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	 */
 	public String get(String key, String ifNull) {
 		
+		NDSValue value= null;
+			
 		if (key.contains("/")) {
-			
-			NDSValue value= getValue(key);
-			if (value == null) { return ifNull; }
-			if (value.getValue() == null) { return ifNull; }
-			return value.toString();
-			
+			value= getValue(key);
 		} else {
-		
-			NDSValue value= attributes.get(key);
-		
-			if (value == null) { return ifNull; }
-			if (value.getValue() == null) { return ifNull; }
-			if ("".equals(value.getValue())) { return ifNull; }
-		
-			return value.toString();
+			value= attributes.get(key);
 		}
 		
+		if (value == null) { return ifNull; }
+		if (value.getValue() == null) { return ifNull; }
+		
+		if (treatEmptyAsNull) {
+			if ("".equals(value.getValue())) { return ifNull; }
+		}
+	
+		return value.toString();
 		
 	}
 	
@@ -1020,24 +951,24 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		}
 	}
 	
+	public void setName(int index) { setName(""+ Math.abs(index)); }
+	public void setName(String name) { this.name = name; }
+	public String getName() { return name; }
+	public Iterator<NDS> iterator() { return sectionList.iterator(); }
+	public Set<String> getKeys() { return attributes.keySet(); }
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#getMergeBehavior()
-	 */
-	public String getMergeBehavior() {
-		return rule.toString();
-	}
-
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#setMergeBehavior(inc.morsecode.MergeRule)
-	 */
-	public void setMergeBehavior(MergeRule rule) {
-		this.rule= rule;
-	}
+	public NDS seek(String path) { return seek(path, false); }
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#setMergeBehavior(java.lang.String)
-	 */
+	public void set(String path, long value) { set(path, new NDSValue(value)); }
+	public void set(String path, int value) { set(path, new NDSValue(value)); }
+	public void set(String path, double value) { set(path, new NDSValue(value)); }
+	public void set(String path, float value) { set(path, new NDSValue(value)); }
+	public void set(String path, boolean value) { set(path, new NDSValue(value)); }
+	public void set(String path, String value) { set(path, new NDSValue(value)); }
+	
+	public String getMergeBehavior() { return rule.toString(); }
+	public void setMergeBehavior(MergeRule rule) { this.rule= rule; }
+	
 	public void setMergeBehavior(String rule) {
 		
 		if ("overwrite".equalsIgnoreCase(rule)) {
@@ -1053,10 +984,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	}
 	
 	
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#toString()
-	 */
 	public String toString() {
 		
 		String string= "";
@@ -1088,9 +1015,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#toPDS()
-	 */
 	public PDS toPDS() throws NimException {
 		
 		PDS pds= new PDS();
@@ -1135,74 +1059,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		return pds;
 	}
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#setName(int)
-	 */
-	public void setName(int index) {
-		setName(""+ Math.abs(index));
-	}
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#setName(java.lang.String)
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#getName()
-	 */
-	public String getName() {
-		return name;
-	}
-
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#iterator()
-	 */
-	@Override
-	public Iterator<NDS> iterator() {
-		return sectionList.iterator();
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#keys()
-	 */
-	public Iterable<String> keys() {
-		return new Iterable<String>() {
-			@Override
-			public Iterator<String> iterator() {
-				return attributes.keySet().iterator();
-			}
-		};
-	}
-	
-	
-	private boolean lock() {
-		if (this.mutex == null) { this.mutex= new Mutex(); }
-		return this.mutex.lock(1);
-	}
-	
-	
-	private void release() {
-		if (this.mutex == null) { this.mutex= new Mutex(); }
-		this.mutex.release();
-	}
-	/*
-	public Iterable<String> values() {
-		return new Iterable<String>() {
-			@Override
-			public Iterator<String> iterator() {
-				return sections.keySet().iterator();
-			}
-		};
-	}
-	*/
-
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#set(java.lang.String, java.lang.StringBuffer)
-	 */
 	public void set(String key, StringBuffer value) {
 		if (value == null) {
 			return;
@@ -1211,9 +1068,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#toJson()
-	 */
 	public JsonObject toJson() {
 		
 		JsonObject json= new JsonObject();
@@ -1233,16 +1087,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 	}
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#getKeys()
-	 */
-	public Set<String> getKeys() {
-		return attributes.keySet();
-	}
-
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#writeToFile(java.io.File)
-	 */
 	public boolean writeToFile(File persistentCache) throws IOException, FileNotFoundException {
 		File dir= persistentCache.getParentFile();
 		
@@ -1288,11 +1132,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#clear()
-	 */
 	public void clear() {
-		// TODO Auto-generated method stub
 		
 		try {
 			lock();
@@ -1305,32 +1145,11 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#isActive()
-	 */
-	public boolean isActive() {
-		return get("active", get("enabled", false));
-	}
+	public boolean isActive() { return get("active", get("enabled", false)); }
+	public int size() { return attributes.size(); }
+	public int length() { return sectionList.size();	 }
+	public boolean isEmpty() { return length() + mass() == 0; }
 
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#size()
-	 */
-	public int size() {
-		return attributes.size();
-		// return sectionList.size();	// + attributes.size();
-	}
-	
-
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#length()
-	 */
-	public int length() {
-		return sectionList.size();	// + attributes.size();
-	}
-
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#mass()
-	 */
 	public long mass() {
 		long mass= sectionList.size();
 		for (NDS section : sectionList) {
@@ -1339,14 +1158,8 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		return mass;
 	}
 	
-	public boolean isEmpty() {
-		return length() + mass() == 0;
-	}
 
 
-	/* (non-Javadoc)
-	 * @see inc.morsecode.PortableDataStructureInterface#pop()
-	 */
 	public NDS pop() {
 		
 		if (sectionList.size() == 0) {
@@ -1357,6 +1170,28 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		
 		return (NDS) delete(section.getName());
 	}
+	
+	public Iterable<String> keys() {
+		return new Iterable<String>() {
+			@Override
+			public Iterator<String> iterator() {
+				return attributes.keySet().iterator();
+			}
+		};
+	}
+	
+	
+	private boolean lock() {
+		if (this.mutex == null) { this.mutex= new Mutex(); }
+		return this.mutex.lock(1);
+	}
+	
+	
+	private void release() {
+		if (this.mutex == null) { this.mutex= new Mutex(); }
+		this.mutex.release();
+	}
+
 
 
 	

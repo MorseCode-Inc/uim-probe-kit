@@ -34,19 +34,14 @@ public final class Encode {
  	*/
 	private static class Secret implements SecurityCodec {
 	
-		/**
-	 	*
-	 	*/
+
 		public String getAlphabet(String[] c) {
 			return "hi8_#94/*%X+=dr[WUfOt\\y>\'IFn5?skSqz]JgYxN-,)2@(3wV<C1Rb\"{Dcup:L MGBZP6~aH;Em}.^QKjloA`Tv0$e|&7!";
-		} /* getAlphabet */
-	
-		/**
-	 	*
-	 	*/
+		}
+
 		public int getRotator(String[] c) {
 			return 7331;
-		} /* getRotator */
+		}
 	
 	
 	}

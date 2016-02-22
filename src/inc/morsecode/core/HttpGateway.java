@@ -29,6 +29,8 @@ import util.kits.DateKit;
 import util.kits.DynamicClassKit;
 import util.kits.SimpleCalendar;
 import util.security.Crypto;
+import util.security.Decoder;
+import util.security.Encoder;
 import util.security.codecs.SecurityCodec;
 
 import com.nimsoft.nimbus.NimAlarm;
@@ -69,21 +71,12 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	private boolean admin= false;
 	private boolean startup= true;
 	
-	private boolean enforceLicense= true;
-	
 	
 	protected HttpGateway(String name, String version, String[] args) throws NimException {
 		this(name, version, PROBE_MANUFACTURER, args);
-		Decode.Secret.alphabet= "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
-		// SimpleCalendar cal= new SimpleCalendar();
-		// cal.advanceDay(7);
-		// System.out.println((System.currentTimeMillis() % 10) + Encode.encode(cal.toString()));
-		// if (getProbeName().equals("pagerdutygtw")) {
-			// enforceLicense= false;
-		// }
 	}
 
-	private HttpGateway(String name, String version, String manufacturer, String[] args) throws NimException {
+	protected HttpGateway(String name, String version, String manufacturer, String[] args) throws NimException {
 		super(name, version, manufacturer, args);
 		HttpGateway.instance= this;
 		
@@ -140,15 +133,8 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see inc.morsecode.pagerduty.CustomProbeInterface#bootstrap()
-	 */
-	@Override
 	public void bootstrap() throws NimException {
-		// unregisterCallback("bootstrap");
-		long interval= HttpGateway.getInterval();
 		
-		if (enforceLicense) {
 		try {
 			licenseCheck();
 		} catch (NimException nx) {
@@ -158,49 +144,55 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 			log.error("License Check Failed: "+ iox.getMessage());
 			System.exit(1);
 		}
-		}
 		
 		try {
 			authenticate();
 		} catch (NimException nx) {
-  				System.out.println(nx.getMessage());
-  				nx.printStackTrace();
-  				System.out.flush();
-  				System.err.flush();
-  				System.exit(1);
+			System.out.println(nx.getMessage());
+			nx.printStackTrace();
+			System.out.flush();
+			System.err.flush();
+			return;
+			// System.exit(1);
 		}
 		
-			try {
-  				bootTomcat();
-  			} catch (Throwable e) {
-  				System.out.println(e.getMessage());
-				Throwable cause= e;
-				e.printStackTrace();
-				cause = stackdump(cause);
-				System.exit(1);
-  			}
+		try {
+			bootTomcat();
+		} catch (Throwable e) {
+			System.out.println(e.getMessage());
+			Throwable cause= e;
+			e.printStackTrace();
+			cause = stackdump(cause);
+			System.exit(1);
+		}
   			
-		
 		// now it should be safe to make any calls we need to the bus
 		updateControllerInfo();
 		
-		// registerCallbackOnTimer(this, "execute", interval, true);
 	}
 
 	public void authenticate() throws NimException {
 		if (config.get("setup/admin/enabled", false)) {
-			String token= config.get("setup/admin/token");
-			String key= config.get("setup/admin/key");
-			if (token == null || key == null || "".equals(token) || "".equals(key)) {
+			String token= config.get("setup/admin/token", null);
+			String key= config.get("setup/admin/key", null);
+			
+			if (token == null || key == null) {
 				System.out.println("MSG001 Probe admin authentication enabled, but configuration is incomplete.  Run set_admin using the probe utility.");
 			} else {
-				NimUserLogin.login(Decode.decode(token), Decode.decode(key));
-				
-				// NimUserLogin login= new NimUserLogin(Decode.decode(token), Decode.decode(key));
-				// String SID= login.loginImpersonate();
-				// System.out.println("Authenticated: "+ SID);
-				// NimUserLogin.login(Decode.decode(token), Decode.decode(key));
-				admin= true;
+				String user= getDecoder().decode(token);
+				String pass= getDecoder().decode(key);
+				try {
+					NimUserLogin.login(user, pass);
+					admin= true;
+				} catch (NimException nx) {
+					switch (nx.getCode()) {
+					case 12:
+						System.out.println("MSG002 Probe admin authentication: failed to login as user '"+ user +"'. Try running set_admin callback again using the probe utility.");
+						break;
+					default:
+						throw nx;
+					}
+				}
 			}
 		}
 	}
@@ -479,7 +471,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		}
 		
 		if (!password.equals(confirm)) {
-			response.set("status", "Error: confirm does not match.");
+			response.set("status", "Error: password and confirm does not match.");
 			session.sendReply(0, response.toPDS());
 			return;
 		}
@@ -496,8 +488,8 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		// we logged in, need to write to the configuration file somehow now.
 		NimRequest controller= controllerRequest();
 		
-		NDS status = writeConfig("/setup/admin", "token", Encode.encode(user), controller);
-		status = writeConfig("/setup/admin", "key", Encode.encode(password), controller);
+		NDS status = writeConfig("/setup/admin", "token", getEncoder().encode(user), controller);
+		status = writeConfig("/setup/admin", "key", getEncoder().encode(password), controller);
 		status = writeConfig("/setup/admin", "enabled", "yes", controller);
 		status.setName("detail");
 		
@@ -506,8 +498,8 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		response.add(status);
 		
 		response.set("status", "OK");
-		response.set("token", Encode.encode(user));
-		response.set("key", Encode.encode(password));
+		response.set("token", getEncoder().encode(user));
+		response.set("key", getEncoder().encode(password));
 		
 		controller.close();
 		
@@ -698,7 +690,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	
 	
 	
-	private final void licenseCheck() throws NimException, IOException {
+	protected void licenseCheck() throws NimException, IOException {
 		
 		SimpleCalendar now= new SimpleCalendar();
 		SimpleCalendar tenDays= new SimpleCalendar();
@@ -770,7 +762,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	static ProbeLicense readLicense(String name, String key) {
 		
 		try {
-			String info= Decode.decode(key);
+			String info= ((HttpGateway)instance).getDecoder().decode(key);
 			
 			System.out.println("Reading License: "+ info);
 			
@@ -808,7 +800,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		sauce+= "|"+ license.getInstances();
 		sauce+= "|"+ license.getValidUntil();
 		
-		license.setKey(Encode.encode(sauce));
+		license.setKey(((HttpGateway)instance).getEncoder().encode(sauce));
 		return license;
 	}
 		
@@ -911,61 +903,90 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	public boolean isAdmin() {
 		return admin;
 	}
-
-
-private final static class Decode {
-
 	
 	
-	public static final String decode(String cypherText) {
-		cypherText= new String(Base64.decodeBase64((cypherText).getBytes()));
-		String phase1 = phase1(cypherText);
-		String clear= Crypto.decode(phase1);
-		return remove(new String(Base64.decodeBase64((clear).getBytes())));
-	}
-
-
-	private static String phase1(String cypherText) {
-		return Crypto.decode(cypherText, new Secret());
-	}
 	
+	protected Encoder getEncoder() { return new HttpGateway.Encode(); }
+	protected Decoder getDecoder() { return new HttpGateway.Decode(); }
 	
-	private static final String remove(String salted) {
-		return salted.substring(salted.indexOf(':') + 1);
-	}
 
-	/**
- 	*
- 	*
- 	*/
-	private static class Secret implements SecurityCodec {
+	private final class Encode implements Encoder {
 	
-		static String alphabet;
 		/**
-	 	*
-	 	*/
-		public String getAlphabet(String[] c) {
-			return "hi8_#94/*%X+=dr[WUfOt\\y>\'IFn5?skSqz]JgYxN-,)2@(3wV<C1Rb\"{Dcup:L MGBZP6~aH;Em}.^QKjloA`Tv0$e|&7!";
-			// return Secret.alphabet;
-			// return "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
-		} /* getAlphabet */
-		/**
-	 	*
-	 	*/
-		public int getRotator(String[] c) {
-			return 7331;
-		} /* getRotator */
+		 * @param args
+		 */
+		
+		public final String encode(String text) {
+			text= add(text);
+			text= new String(Base64.encodeBase64((text).getBytes()));
+			String phase2 = phase2(text);
+			
+			return new String(Base64.encodeBase64((Crypto.encode(phase2, new Secret()).getBytes())));
+		}
+	
+	
+		private String phase2(String text) {
+			return Crypto.encode(text);
+		}
+		
+		private final String add(String text) {
+			return "salt:"+ text;
+		}
+		
+
+		private class Secret implements SecurityCodec {
+		
+	
+			public String getAlphabet(String[] c) {
+				// return "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
+				return "hi8_#94/*%X+=dr[WUfOt\\y>\'IFn5?skSqz]JgYxN-,)2@(3wV<C1Rb\"{Dcup:L MGBZP6~aH;Em}.^QKjloA`Tv0$e|&7!";
+			}
+	
+			public int getRotator(String[] c) {
+				return 7331;
+			}
+		
+		
+		}
 	
 	
 	}
-
 	
-	/*
-	public AlarmMessageTemplate getMessage(String name) {
+	private final class Decode implements Decoder {
+		
+		public final String decode(String cypherText) {
+			cypherText= new String(Base64.decodeBase64((cypherText).getBytes()));
+			String phase1 = phase1(cypherText);
+			String clear= Crypto.decode(phase1);
+			return remove(new String(Base64.decodeBase64((clear).getBytes())));
+		}
+	
+	
+		private String phase1(String cypherText) {
+			return Crypto.decode(cypherText, new Secret());
+		}
+		
+		
+		private final String remove(String salted) {
+			return salted.substring(salted.indexOf(':') + 1);
+		}
+	
+		private class Secret implements SecurityCodec {
+			
+			
+			public String getAlphabet(String[] c) {
+				// return "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
+				return "hi8_#94/*%X+=dr[WUfOt\\y>\'IFn5?skSqz]JgYxN-,)2@(3wV<C1Rb\"{Dcup:L MGBZP6~aH;Em}.^QKjloA`Tv0$e|&7!";
+			}
+	
+			public int getRotator(String[] c) {
+				return 7331;
+			}
+		
+		
+		}
+	
 	}
-	*/
-
-}
 
 
 

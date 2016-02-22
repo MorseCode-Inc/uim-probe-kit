@@ -1,13 +1,14 @@
 package inc.morsecode;
 
+import inc.morsecode.util.json.JsonArray;
+
+import inc.morsecode.util.json.JsonObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-
-import util.json.JsonArray;
-import util.json.JsonObject;
 
 import com.nimsoft.nimbus.NimException;
 import com.nimsoft.nimbus.PDS;
@@ -125,8 +126,7 @@ public interface PortableDataStructureInterface {
 
 	public abstract Set<String> getKeys();
 
-	public abstract boolean writeToFile(File persistentCache)
-			throws IOException, FileNotFoundException;
+	public abstract boolean writeToFile(File persistentCache) throws IOException, FileNotFoundException;
 
 	public abstract void clear();
 

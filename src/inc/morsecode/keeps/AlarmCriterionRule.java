@@ -3,9 +3,9 @@ package inc.morsecode.keeps;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
 
-import util.json.JsonObject;
 import inc.morsecode.NDS;
 import inc.morsecode.nas.UIMAlarmNew;
+import inc.morsecode.util.json.JsonObject;
 
 public class AlarmCriterionRule extends NDS {
 

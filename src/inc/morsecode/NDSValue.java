@@ -1,9 +1,10 @@
 package inc.morsecode;
 
+import inc.morsecode.util.json.JsonPrimitive;
+import inc.morsecode.util.json.JsonValue;
+
 import java.util.Map;
 
-import util.json.JsonPrimitive;
-import util.json.JsonValue;
 
 import com.nimsoft.nimbus.PDS;
 

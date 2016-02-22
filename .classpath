@@ -5,6 +5,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/nimsoft.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat-embed-core.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/lib.json"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

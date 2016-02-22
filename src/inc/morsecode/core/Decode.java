@@ -25,25 +25,21 @@ public final class Decode {
 		return salted.substring(salted.indexOf(':') + 1);
 	}
 
-	/**
- 	*
- 	*
- 	*/
+
 	private static class Secret implements SecurityCodec {
-	
-		/**
-	 	*
-	 	*/
+
 		public String getAlphabet(String[] c) {
 			return "hi8_#94/*%X+=dr[WUfOt\\y>\'IFn5?skSqz]JgYxN-,)2@(3wV<C1Rb\"{Dcup:L MGBZP6~aH;Em}.^QKjloA`Tv0$e|&7!";
-		} /* getAlphabet */
+		} 
 	
-		/**
-	 	*
-	 	*/
+
 		public int getRotator(String[] c) {
-			return 7331;
-		} /* getRotator */
+			String a= getAlphabet(c);
+			int r= (int)a.charAt(a.length() - 1);
+			r*= (int)a.charAt(0);
+			r+= (int)a.charAt(a.length() / 2);
+			return r % 9999;
+		} 
 	
 	
 	}

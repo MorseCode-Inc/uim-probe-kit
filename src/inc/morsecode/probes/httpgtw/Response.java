@@ -1,15 +1,12 @@
 package inc.morsecode.probes.httpgtw;
 
-import java.util.Map;
 
-import util.json.JsonObject;
-
-import com.nimsoft.nimbus.PDS;
-
-import inc.morsecode.NDS;;
+import inc.morsecode.NDS;
+import inc.morsecode.util.json.JsonObject;
 
 public class Response extends Throwable {
 	
+	private static final long serialVersionUID = 851237839233368653L;
 	private NDS response;
 	private JsonObject payload;
 

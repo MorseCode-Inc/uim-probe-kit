@@ -53,9 +53,13 @@ public class UIMAlarmMessage extends UIMMessage {
 		String sig= "";
 		sig+= getAlarmNimid();
 		sig+= " ["+ getAlarmSeverity() +"]";
-		sig+= " robot="+ getAlarmRobot();
+		sig+= " d="+ getAlarmDomain();
+		sig+= " o="+ getAlarmOrigin();
+		sig+= " r="+ getAlarmRobot();
+		sig+= " s="+ getAlarmSource();
+		sig+= " p="+ getAlarmPrid();
 		if (isAssigned()) {
-			sig+= " assignedto="+ getAlarmAssignedTo();
+			sig+= " a="+ getAlarmAssignedTo();
 		}
 		sig+= ": "+ getAlarmMessage();
 		return sig;
@@ -156,7 +160,7 @@ public class UIMAlarmMessage extends UIMMessage {
 
 	public String getAlarmSuppCount() { return get("udata/"+ SUPPCOUNT); }
 
-	public String getAlarmArrival() { return get("udata/"+ ARRIVAL); }
+	public long getAlarmArrival() { return get("udata/"+ ARRIVAL, 0L) * 1000; }
 
 	public String getAlarmNas() { return get("udata/"+ NAS); }
 
@@ -183,6 +187,10 @@ public class UIMAlarmMessage extends UIMMessage {
 		str+= " ("+ getAlarmHostname() +")" +": "+ getAlarmMessage();
 		
 		return str;
+	}
+
+	public String getAlarmField(String key, String ifNull) {
+		return get("udata/"+ key, ifNull);
 	}
 
 }
