@@ -558,7 +558,7 @@ public static SimpleCalendar toCalendar(String time, String tz) throws ParseExce
 		throw new ParseException("Cannot parse NULL date/time", 0);
 	}
 	
-	StringTokenizer parser= new StringTokenizer(time, "-/:. ");
+	StringTokenizer parser= new StringTokenizer(time, "-/:. T");
 	
 	if (tz == null) {
 		tz= TimeZone.getDefault().getID();
@@ -584,7 +584,9 @@ public static SimpleCalendar toCalendar(String time, String tz) throws ParseExce
 		SimpleCalendar ts= new SimpleCalendar();
 		
 		// GregorianCalendar.getInstance(TimeZone.getTimeZone(tz));
+		
 		ts.setTimeZone(TimeZone.getTimeZone(tz));
+		
 		
 		ts.set(Calendar.YEAR, year);
 		ts.set(Calendar.MONTH, month - 1);

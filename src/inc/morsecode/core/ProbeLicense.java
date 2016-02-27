@@ -59,7 +59,7 @@ public class ProbeLicense extends NDS {
 			
 			expires.advanceMonth(1);
 		
-			ProbeLicense l= new ProbeLicense("TrialDemo", "PagerDuty", 2, expires);
+			ProbeLicense l= new ProbeLicense("TrialDemo", "CompanyName", 2, expires);
 			
 			HttpGateway.create(l);
 		

@@ -14,8 +14,7 @@ import inc.morsecode.etc.Mutex;
 
 public class QueueSubscription extends NDS implements Runnable {
 	
-	private Mutex lock= new Mutex();
-
+	private transient Mutex lock= new Mutex();
 	private transient NimSubscribe subscription;
 	
 	private Vector<UIMMessage> buffer;
@@ -56,29 +55,28 @@ public class QueueSubscription extends NDS implements Runnable {
 	public void subscribe() throws NimException {
 		try {
 			if (!lock()) { return; }
-		// NimUserLogin.login("administrator", "this4now");
-		String address= get("address", "no address specified");
-		if (this.subscription == null || !this.subscription.isOk()) {
-			if (subscription != null) { 
-				this.subscription.close();
+			
+			String address= get("address", "no address specified");
+			if (this.subscription == null || !this.subscription.isOk()) {
+					
+				if (subscription != null) { 
+					this.subscription.close();
+				}
+				this.subscription= new NimSubscribe(getName(), address, true);
 			}
-			// this.subscription= new NimSubscribe("/UIM/MORSECODE", getName(), true);
-			this.subscription= new NimSubscribe(getName(), address, true); // "/UIM/MORSECODE/_hub");
-		}
-		// this.subscription.subscribeForQueue(getQueueName(), this, "receive", getBulkSize());
-		
-		String queueName= getQueueName();
-		
-		if (subscription.isOk()) { 
-			return;
-		}
-		
-		if (getBulkSize() <= 1) {
-			this.subscription.subscribeForQueue(queueName, this, "receive");
-		} else {
-			this.subscription.subscribeForQueue(queueName, this, "receive");
-			// this.subscription.subscribeForQueue(queueName, this, "receive", getBulkSize());
-		}
+			
+			String queueName= getQueueName();
+			
+			if (subscription.isOk()) { 
+				return;
+			}
+			
+			if (getBulkSize() <= 1) {
+				this.subscription.subscribeForQueue(queueName, this, "receive");
+			} else {
+				this.subscription.subscribeForQueue(queueName, this, "receive");
+				// this.subscription.subscribeForQueue(queueName, this, "receive", getBulkSize());
+			}
 		} finally {
 			lock.release();
 		}
@@ -134,19 +132,6 @@ public class QueueSubscription extends NDS implements Runnable {
 			release();
 		}
 	}
-	
-	/*
-	public void receive(NimSession session, PDS[] envelopes, PDS[] args) throws NimException {
-		for (int i= 0; i < envelopes.length; i++) {
-			
-			NDS message= NDS.create(envelopes[i]);
-			System.out.println(message);
-		}
-		NDS reply= new NDS();
-		session.sendReply(0, reply.toPDS());
-	}
-	*/
-	
 	
 	public String getQueueName() { return this.get("queue", null); }
 	

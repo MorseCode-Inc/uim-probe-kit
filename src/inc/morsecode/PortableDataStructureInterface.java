@@ -43,7 +43,7 @@ public interface PortableDataStructureInterface {
 
 	public abstract void set(String path, boolean value);
 
-	public abstract void set(String path, String value);
+	public abstract NDS set(String path, String value);
 
 	public abstract void set(String path, NDSValue value);
 

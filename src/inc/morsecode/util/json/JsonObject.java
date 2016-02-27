@@ -54,19 +54,20 @@ public class JsonObject extends JsonValue {
 	@Override
 	public Object getValue() { return this; }
 
-	public void set(String name, String value) { set(new JsonMember(name, value)); }
-	public void set(String name, Integer value) { set(new JsonMember(name, value)); }
-	public void set(String name, Long value) { set(new JsonMember(name, value)); }
-	public void set(String name, Double value) { set(new JsonMember(name, value)); }
-	public void set(String name, Boolean value) { set(new JsonMember(name, value)); }
-	public void set(String name, Short value) { set(new JsonMember(name, (int)value)); }
+	public JsonObject set(String name, String value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, Integer value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, Long value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, Double value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, Boolean value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, Short value) { set(new JsonMember(name, (int)value)); return this; }
 	
-	public void set(String name, JsonObject value) { set(new JsonMember(name, value)); }
-	public void set(String name, JsonArray value) { set(new JsonMember(name, value)); }
-	public void set(String name, JsonValue value) { set(new JsonMember(name, value)); }
+	public JsonObject set(String name, JsonObject value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, JsonArray value) { set(new JsonMember(name, value)); return this; }
+	public JsonObject set(String name, JsonValue value) { set(new JsonMember(name, value)); return this; }
 	
-	public void set(JsonMember member) {
+	public JsonObject set(JsonMember member) {
 		data.put(member.getName(), member);
+		return this;
 	}
 	
 	// getters
@@ -138,7 +139,6 @@ public class JsonObject extends JsonValue {
 		if (value == null) { return ifNull; }
 		return value;
 		
-		// throw new RuntimeException("Unhandled condition.");
 	}
 	
 	public int get(String name, int ifNull) {
@@ -185,11 +185,7 @@ public class JsonObject extends JsonValue {
 		JsonMember member= data.get(name);
 		if (member == null) { return ifNull; }
 		
-//System.out.println("got member "+ name +" = "+ member);
 		Object value= member.getValue();
-if (value == null) {
-	//System.out.println("value for member is null");
-}
 		if (value == null) { return ifNull; }
 		
 		return value;
@@ -203,12 +199,7 @@ if (value == null) {
 	public JsonObject getObject(String name, JsonObject ifNull) {
 		JsonObject value= (JsonObject)get(name, (Object)null);
 		
-//System.out.println("getting value for object by name '"+ name +"': "+ value);
-for (String key : data.keySet()) {
-	//System.out.println("key: "+ key +"="+ data.get(key));
-}
 		if (value == null) {
-//System.out.println("value is null");
 			return ifNull;
 		}
 		if (value instanceof JsonObject) {
@@ -227,8 +218,6 @@ for (String key : data.keySet()) {
 			if (member.getJsonValue() instanceof JsonObject) {
 				str+= delim + StrUtils.prefixText("\t", member.toString());
 				
-				//str+= nl +"\t"+ delim +"\""+ member.getName() +"\":";
-				//str+= "\n"+ StrUtils.prefixText("\t\t", member.getJsonValue().toString());
 			} else if (member.getJsonValue() instanceof JsonArray) {
 				str+= nl +"\t"+ delim +"\""+ member.getName() +"\":";
 				str+= "\n"+ StrUtils.prefixText("\t\t", member.getJsonValue().toString());

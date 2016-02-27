@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Random;
 
 import inc.morsecode.NDS;
 import inc.morsecode.NDSValue;
@@ -95,6 +96,9 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		ready= true;
 	}
 	
+	private HttpGateway() throws NimException {
+		super("internal", "1.0", PROBE_MANUFACTURER, new String[]{});
+	}
 
 	
 	/* (non-Javadoc)
@@ -800,8 +804,15 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		sauce+= "|"+ license.getInstances();
 		sauce+= "|"+ license.getValidUntil();
 		
-		license.setKey(((HttpGateway)instance).getEncoder().encode(sauce));
-		return license;
+		try {
+			HttpGateway instance= new HttpGateway() { public void probeCycle() { } };
+			license.setKey(((HttpGateway)instance).getEncoder().encode(sauce));
+			return license;
+		} catch (NimException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 		
 	
@@ -912,25 +923,22 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 
 	private final class Encode implements Encoder {
 	
-		/**
-		 * @param args
-		 */
-		
-		public final String encode(String text) {
-			text= add(text);
+		public final String encode(String text) { return encode(text, "skSqz]JgYxN-,)2@(3wV"); }
+		public final String encode(String text, String entropy) {
+			text= add(text, entropy);
 			text= new String(Base64.encodeBase64((text).getBytes()));
 			String phase2 = phase2(text);
 			
 			return new String(Base64.encodeBase64((Crypto.encode(phase2, new Secret()).getBytes())));
 		}
 	
-	
 		private String phase2(String text) {
 			return Crypto.encode(text);
 		}
 		
-		private final String add(String text) {
-			return "salt:"+ text;
+		private final String add(String text, String entropy) {
+			if (entropy == null) { entropy= "t\\y>\'IFn5?s"; }
+			return entropy.replaceAll(":", "_") +":"+ text;
 		}
 		
 
@@ -938,12 +946,18 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		
 	
 			public String getAlphabet(String[] c) {
-				// return "y>\'IFn5?shifOt\\kSqz]JgYxN-,)2@(3wV<Dcup:L MGBZP6~aH;Em8_#94/*%X+=dC1Rb\"{r[WU}.^QKjloA`Tv0$e|&7!";
 				return "hi8_#94/*%X+=dr[WUfOt\\y>\'IFn5?skSqz]JgYxN-,)2@(3wV<C1Rb\"{Dcup:L MGBZP6~aH;Em}.^QKjloA`Tv0$e|&7!";
 			}
 	
 			public int getRotator(String[] c) {
-				return 7331;
+				
+				String a= getAlphabet(c);
+				int r= (int)a.charAt(a.charAt(3 % a.length()));
+				r*= (int)a.charAt(a.charAt(67 % a.length()));
+				r+= (int)a.charAt(a.charAt(104 % a.length()));
+				
+				return r % 9999;
+				
 			}
 		
 		
@@ -980,7 +994,12 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 			}
 	
 			public int getRotator(String[] c) {
-				return 7331;
+				String a= getAlphabet(c);
+				int r= (int)a.charAt(a.charAt(3 % a.length()));
+				r*= (int)a.charAt(a.charAt(67 % a.length()));
+				r+= (int)a.charAt(a.charAt(104 % a.length()));
+				
+				return r % 9999;
 			}
 		
 		

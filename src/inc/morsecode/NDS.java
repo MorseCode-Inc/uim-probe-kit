@@ -964,7 +964,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	public void set(String path, double value) { set(path, new NDSValue(value)); }
 	public void set(String path, float value) { set(path, new NDSValue(value)); }
 	public void set(String path, boolean value) { set(path, new NDSValue(value)); }
-	public void set(String path, String value) { set(path, new NDSValue(value)); }
+	public NDS set(String path, String value) { set(path, new NDSValue(value)); return this; }
 	
 	public String getMergeBehavior() { return rule.toString(); }
 	public void setMergeBehavior(MergeRule rule) { this.rule= rule; }
