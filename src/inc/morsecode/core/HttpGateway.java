@@ -441,8 +441,9 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	@Override
 	public void shutdown() {
 		
-		// need to signal tomcat that we are shutting down
+		flushCache();
 		
+		// need to signal tomcat that we are shutting down
 		try {
 			tomcat.stop();
 		} catch (LifecycleException e) {
