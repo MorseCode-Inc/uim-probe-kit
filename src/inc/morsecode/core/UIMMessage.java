@@ -54,7 +54,10 @@ public class UIMMessage extends NDS {
 	 * @param nds
 	 */
 	public UIMMessage(NDS nds) {
-		super(nds);
+		this(nds, false);
+	}
+	public UIMMessage(NDS nds, boolean reference) {
+		super(nds, reference);
 		if (getName() == null) {
 			setName("message");
 		}

@@ -45,9 +45,8 @@ public class UIMAlarmMessage extends UIMMessage {
 	public static final String CUSTOM4 = "custom_4";
 	public static final String CUSTOM5 = "custom_5";
 
-	public UIMAlarmMessage(NDS nds) {
-		super(nds);
-	}
+	public UIMAlarmMessage(NDS nds) { super(nds); }
+	public UIMAlarmMessage(NDS nds, boolean reference) { super(nds, reference); }
 	
 	public String signature() {
 		String sig= "";
