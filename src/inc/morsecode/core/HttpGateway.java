@@ -447,8 +447,11 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		try {
 			tomcat.stop();
 		} catch (LifecycleException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			System.out.println("Shutdown");
+			System.out.flush();
+			System.err.flush();
 		}
 		
 	}
