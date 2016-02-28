@@ -107,7 +107,7 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	}
 	
 	public NDS(NDS nds) {
-		this(nds, true);	
+		this(nds, false);	
 	}
 	
 	public NDS(NDS nds, boolean reference) {
@@ -115,8 +115,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		super.setValue(this);
 		if (nds == null) { return; }
 		setName(nds.getName());
-		
-		// this.name= nds.name;
 		
 		// if reference, then just point our internal variables to the same as the source nds
 		if (reference) {
@@ -762,15 +760,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		return get(key, (String)null);
 	}
 	
-	/*
-	public ArrayList get(String key, ArrayList<Object> arrayList) {
-		ArrayList<NDSValue> array= new ArrayList<NDSValue>();
-		
-		
-		
-		return array;
-	}
-	*/
 	
 	/* (non-Javadoc)
 	 * @see inc.morsecode.PortableDataStructureInterface#get(java.lang.String, java.lang.String)
