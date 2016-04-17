@@ -1,6 +1,7 @@
 package inc.morsecode;
 
 import inc.morsecode.etc.ArrayUtils;
+
 import inc.morsecode.etc.Mutex;
 import inc.morsecode.util.json.JsonArray;
 import inc.morsecode.util.json.JsonObject;
@@ -68,6 +69,12 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 	}
 	
 	public NDS(String name) {
+		super(DataType.NDS);
+		super.setValue(this);
+		setName(name);
+	}
+
+	public NDS(int name) {
 		super(DataType.NDS);
 		super.setValue(this);
 		setName(name);
@@ -167,7 +174,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			} else if (element instanceof JsonArray) {
 				
 				copy(key +"/"+ i, (JsonArray)element);
-				
 			} else {
 				set(key +"/"+ i, element.toString());
 				
@@ -237,73 +243,39 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 			case PDS.PDS_I64:
 			case PDS.PDS_PCH:
 			case PDS.PDS_PPI:
-				
 				Object value= pds.get(key);
-				
 				nds.set(key, ""+ value);
 				break;
-				
+
 			case PDS.PDS_PDS:
-				// this is a section
-				
 				PDS section= pds.getPDS(key);
-				
 				nds.set(key, NDS.create(key, section));
-				
 				break;
+
 			case PDS.PDS_PPDS:
-				
 				NDS sections= new NDS();
-				
 				int i= 0;
 				for (PDS node : pds.getTablePDSs(key)) {
 					sections.set(""+ (i), NDS.create(""+ (i++), node));
 				}
-				
 				nds.set(key, sections);
-				
 				break;
+
 			case PDS.PDS_PPCH:
-				
 				String[] table= pds.getTableStrings(key);
 				nds.set(key, table);
 				break;
+
 			case PDS.PDS_VOID:
 				byte[] data= pds.getBytes(key);
 				nds.set(key, data);
-				// System.err.println("Unsupported PDS Datatype: "+ pds.getTypeAsName(key));
 				break;
+
 			default: 
-				System.err.println("Unsupported PDS Datatype: "+ pds.getTypeAsName(key));
-				Object o= pds.get(key);
-				System.err.println(o);
+				System.err.println("Unsupported PDS Datatype: "+ key +" ("+ pds.getTypeAsName(key) +")");
 			}
 			
 		}
-//		
-//		Set<String> keys = map.keySet();
-//		if (keys.size() == 1) {
-//			for (String key : keys) {
-//				Map<String, Object> sectionMap= (Map<String, Object>)map.get(key);
-//				NDS section= new NDS(key, sectionMap);
-//				debug(section);
-//				return section;
-//			}
-//			
-//		} else {
-//		
-//			for (String key : keys) {
-//				Object value= map.get(key);
-//				
-//				if (value instanceof Map) {
-//					NDS section= new NDS(key, (Map<String,Object>)value);
-//					nds.add(section);
-//				} else {
-//					
-//				}
-//				
-//			}
-//		}
 		
 		return nds;
 	}
@@ -999,7 +971,6 @@ public class NDS extends NDSValue implements Iterable<NDS>, PortableDataStructur
 		}
 		
 		return string;
-			
 		
 	}
 	
