@@ -238,16 +238,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 		
 		if (flushCache && 900 * 1000 < (System.currentTimeMillis() - persistentData.get("last_write", 0L))) {
 			// the cache was recently updated
-			log.debug("Flush cache to disk > "+ persistentCache.getAbsolutePath());
-			// log.trace("Cache Data\n"+ persistentData);
-			try {
-				persistentData.writeToFile(persistentCache);
-				persistentData.set("last_write", System.currentTimeMillis());
-			} catch (FileNotFoundException e) {
-				System.err.println("ERR002 Failed to save runtime data file: "+ persistentCache +" ["+ e.getMessage() +"]");
-			} catch (IOException e) {
-				System.err.println("ERR003 Failed to save runtime data file: "+ persistentCache +" ["+ e.getMessage() +"]");
-			}
+			flushCacheNow();
 		}
 		
 		/*
@@ -267,6 +258,19 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 			anything.printStackTrace();
 		}
 		
+	}
+
+	private void flushCacheNow() {
+		log.debug("Flush cache ("+ persistentData.mass() +") to disk > "+ persistentCache.getAbsolutePath());
+		// log.trace("Cache Data\n"+ persistentData);
+		try {
+			persistentData.writeToFile(persistentCache);
+			persistentData.set("last_write", System.currentTimeMillis());
+		} catch (FileNotFoundException e) {
+			System.err.println("ERR002 Failed to save runtime data file: "+ persistentCache +" ["+ e.getMessage() +"]");
+		} catch (IOException e) {
+			System.err.println("ERR003 Failed to save runtime data file: "+ persistentCache +" ["+ e.getMessage() +"]");
+		}
 	}
 
 	private Throwable stackdump(Throwable cause) {
@@ -441,7 +445,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	@Override
 	public void shutdown() {
 		
-		flushCache();
+		flushCacheNow();
 		
 		// need to signal tomcat that we are shutting down
 		try {
