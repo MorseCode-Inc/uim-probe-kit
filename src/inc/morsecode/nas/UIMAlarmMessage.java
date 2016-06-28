@@ -1,6 +1,5 @@
 package inc.morsecode.nas;
 
-import com.nimsoft.nimbus.NimAlarm;
 
 import inc.morsecode.NDS;
 import inc.morsecode.core.UIMMessage;
@@ -173,7 +172,6 @@ public class UIMAlarmMessage extends UIMMessage {
 	public String getCustom3() { return get("udata/"+ CUSTOM3); }
 	public String getCustom4() { return get("udata/"+ CUSTOM4); }
 	public String getCustom5() { return get("udata/"+ CUSTOM5); }
-
 	
 	
 	public String getOneLiner() {
