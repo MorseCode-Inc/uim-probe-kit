@@ -8,9 +8,13 @@ import java.util.List;
 public class AlarmFilter {
 
 	protected NDS definition;
-
+	
 	public AlarmFilter() {
-		super();
+		this.definition= new NDS();
+	}
+
+	public AlarmFilter(NDS definition) {
+		this.definition= definition;
 	}
 
 	public boolean isActive() {
