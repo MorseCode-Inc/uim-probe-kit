@@ -48,7 +48,7 @@ public class AlarmCriterionRule extends NDS {
 				String comparison= key.split("\\.")[1];
 				key= key.split("\\.")[0];
 				
-				String value= alarm.get("udata/"+ key);
+				String value= alarm.getAlarmField(key, null);
 				
 				if (value == null) {
 					System.err.println("Invalid alarm criteria key: '"+ key +"' is null for rule '"+ getName() +"'. Filter may not work as desired.");
@@ -90,7 +90,7 @@ public class AlarmCriterionRule extends NDS {
 			} else if (!key.startsWith("_")) {
 				// exact equality matching
 				
-				String value= alarm.get(key);
+				String value= alarm.getAlarmField(key, null);
 				String expected= get(key);
 				
 				if (value != null) {
