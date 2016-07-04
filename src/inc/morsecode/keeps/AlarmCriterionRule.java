@@ -52,7 +52,7 @@ public class AlarmCriterionRule extends NDS {
 				
 				if (value == null) {
 					System.err.println("Invalid alarm criteria key: '"+ key +"' is null for rule '"+ getName() +"'. Filter may not work as desired.");
-					return false;
+					continue;
 				}
 				
 				boolean matches= false;
