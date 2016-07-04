@@ -52,37 +52,25 @@ public class AlarmCriterionRule extends NDS {
 				
 				if (value == null) {
 					System.err.println("Invalid alarm criteria key: '"+ key +"' is null for rule '"+ getName() +"'. Filter may not work as desired.");
+					return false;
 				}
 				
 				boolean matches= false;
 				if ("matches".equals(comparison)) {
-					if (value != null) {
-						matches = compare(key, pattern, value);
-					}
+					matches = compare(key, pattern, value);
 				} else if ("starts_with".equals(comparison)) {
-					if (value != null) {
-						matches = value.startsWith(pattern);
-					}
+					matches = value.startsWith(pattern);
 				} else if ("ends_with".equals(comparison)) {
-					if (value != null) {
-						matches = value.endsWith(pattern);
-					}
+					matches = value.endsWith(pattern);
 				} else if ("contains".equals(comparison)) {
-					if (value != null) {
-						matches = value.contains(pattern);
-					}
+					matches = value.contains(pattern);
 				} else if ("eq".equals(comparison)) {
-					if (value != null) {
-						matches = value.equalsIgnoreCase(pattern);
-					}
-					
+					matches = value.equalsIgnoreCase(pattern);
 				} else if ("not".equals(comparison)) {
-					if (value != null) {
-						matches = !compare(key, pattern, value);
-					}
+					matches = !compare(key, pattern, value);
 				}
 				
-				System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" "+ comparison +" "+ pattern +" ] "+ getRule() +" ? "+ matches);
+				System.out.println(trigger.getName() + " "+ alarm.getAlarmNimid() +": "+ key +" [ "+ value +" "+ comparison +" "+ pattern +" ] "+ getRule() +" ? "+ matches);
 				if (!matches) {
 					return false;
 				}
