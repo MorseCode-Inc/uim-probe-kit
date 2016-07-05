@@ -82,7 +82,7 @@ public class AlarmCriterionRule extends NDS {
 				String expected= get(key);
 				
 				if (value != null) {
-					System.out.println(trigger.getName() + ": "+ key +" [ "+ value +" == "+ expected +" ] "+ getRule() +" ? "+ value.equals(expected));
+					System.out.println(trigger.getName() + " "+ alarm.getAlarmNimid() +": "+ key +" [ "+ value +" == "+ expected +" ] "+ getRule() +" ? "+ value.equals(expected));
 					if (!value.equals(expected)) {
 						return false;
 					}
