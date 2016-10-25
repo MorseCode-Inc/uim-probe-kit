@@ -44,8 +44,14 @@ public class UIMAlarmMessage extends UIMMessage {
 	public static final String CUSTOM4 = "custom_4";
 	public static final String CUSTOM5 = "custom_5";
 
-	public UIMAlarmMessage(NDS nds) { super(nds); }
-	public UIMAlarmMessage(NDS nds, boolean reference) { super(nds, reference); }
+	public UIMAlarmMessage(NDS nds) { 
+	    this(nds, false); 
+	    
+	}
+	
+	public UIMAlarmMessage(NDS nds, boolean reference) { 
+	    super(nds, reference); 
+	}
 	
 	public String signature() {
 		String sig= "";
@@ -66,6 +72,7 @@ public class UIMAlarmMessage extends UIMMessage {
 	public boolean isAssigned() {
 		return getAlarmAssignedTo() != null;
 	}
+	
 
 	public String getAlarmSid() { return get("udata/"+ SID); }
 	
@@ -74,25 +81,16 @@ public class UIMAlarmMessage extends UIMMessage {
 	public String getAlarmAssignedBy() { return get("udata/"+ ASSIGNED_BY); }
 
 	public String getAlarmNimts() { return get("udata/"+ NIMTS); }
-
 	public String getAlarmVisible() { return get("udata/"+ VISIBLE); }
-
 	public String getAlarmTzOffset() { return get("udata/"+ TZ_OFFSET); }
-
 	public String getAlarmDevId() { return get("udata/"+ DEV_ID); }
-
 	public String getAlarmEventType() { return get("udata/"+ EVENT_TYPE); }
-
 	public String getAlarmOrigin() { return get("udata/"+ ORIGIN); }
-
 	public String getAlarmSubsys() { return get("udata/"+ SUBSYS); }
-
 	public String getAlarmHostname() { return get("udata/"+ HOSTNAME); }
-
 	public String getAlarmPrid() { return get("udata/"+ PRID); }
-
 	public String getAlarmRobot() { return get("udata/"+ ROBOT); }
-
+	
 	public String getAlarmSeverity() { 
 		
 		
@@ -187,6 +185,10 @@ public class UIMAlarmMessage extends UIMMessage {
 	}
 
 	public String getAlarmField(String key, String ifNull) {
+	    if ("severity".equals(key)) {
+	        return getAlarmSeverity();
+	    }
+	    
 		return get("udata/"+ key, ifNull);
 	}
 

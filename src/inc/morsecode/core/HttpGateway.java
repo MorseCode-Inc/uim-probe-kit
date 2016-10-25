@@ -58,7 +58,7 @@ public abstract class HttpGateway extends NimProbe implements org.apache.catalin
 	private File persistentCache;
 	
 	protected NimLog log;
-	protected static NDS config;
+	private static NDS config;
 	private NDS messageTemplates;
 	private NDS activeProfiles;
 	private NDS controllerInfo= new NDS();

@@ -7,7 +7,7 @@ import inc.morsecode.NDS;
 import com.nimsoft.nimbus.NimException;
 import com.nimsoft.nimbus.NimRequest;
 
-public interface CustomProbeInterface {
+public interface CustomProbeInterface<T> {
 
 	public static final String NIM_ROBOT_NAME = "robotname";
 	public static final String NIM_OS_DESCRIPTION = "os_description"; // Linux 2.6.32-279.el6.x86_64 #1 SMP Fri Jun 22 12:19:21 UTC 2012 x86_64

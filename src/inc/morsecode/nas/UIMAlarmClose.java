@@ -17,6 +17,10 @@ public class UIMAlarmClose extends UIMMessage {
 		return str;
 	}
 	
+    public String[] getClosedAlarms() {
+        return getArray("udata/closed_alarms", new String[0]);
+    }
+	
 
 	
 	
