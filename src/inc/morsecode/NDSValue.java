@@ -21,11 +21,11 @@ public class NDSValue {
 	protected NDSValue(DataType type) { this.type= type; }
 	
 	public NDSValue(String value) { 
-		this.value= value; type= DataType.STR;
+		type= DataType.STR;
+		if (value == null) { return; }
+		value= value.trim();
 		
-		if (value == null) {
-			return;
-		}
+		this.value= value.replaceAll("(\n|\r)", " ");
 		
 		try {
 			this.value= Integer.parseInt(value);
